@@ -1,4 +1,6 @@
 import pygame, random
+from sudden_death import sudendeath
+
 
 pygame.init()
 
@@ -12,8 +14,11 @@ clock= pygame.time.Clock()
 puntos_p1=0
 puntos_p2=0
 
-tiempo=20
+tiempo=5
 frame_count=0
+
+elmo=["frame-01.gif","frame-02.gif","frame-03.gif","frame-04.gif","frame-05.gif","frame-06.gif",
+      "frame-07.gif","frame-08.gif","frame-09.gif","frame-10.gif","frame-11.gif","frame-12.gif",]
 
 
 #Acciones de la bola
@@ -64,7 +69,7 @@ dy_inicio=random.choice(aleatorio)
 
 
 def Reiniciar():
-    global puntos_p1,puntos_p2,tiempo
+    global puntos_p1,puntos_p2,tiempo,running2
      
     paused = True
 
@@ -82,9 +87,45 @@ def Reiniciar():
                 tiempo =120
 
                 paused = False
+                running2= False
 
+def Move():
 
-                
+    ball_velocity=2
+
+    aleatorio=[-1,1]
+    dx=random.choice(aleatorio)
+    dy=random.choice(aleatorio)
+
+    ball_rect.x += dx * ball_velocity
+    ball_rect.y += dy * ball_velocity
+
+    if player2_rect.colliderect(ball_rect):
+            dx= -1 *dx
+            dy=random.choice(aleatorio)
+
+    if player1_rect.colliderect(ball_rect):
+            dx= -1 * dx
+            dy=random.choice(aleatorio)
+
+    keys=pygame.key.get_pressed()
+
+        #Mover la gallina
+
+    if keys[pygame.K_UP] and player2_rect.top>64: 
+                player2_rect.y-=5
+
+    if keys[pygame.K_DOWN] and player2_rect.bottom<height:
+                player2_rect.y+=5
+
+        
+        #Mover el pelicano
+
+    if keys[pygame.K_w] and player1_rect.top>64: 
+                player1_rect.y-=5
+
+    if keys[pygame.K_s] and player1_rect.bottom<height:
+                player1_rect.y+=5
 
 
 
@@ -109,7 +150,6 @@ while running:
     
     if tiempo == 0:
          
-        tiempo=0    
             
         if puntos_p1 > puntos_p2:
                  
@@ -127,8 +167,119 @@ while running:
                 display_surface.blit(win2,(0,0))
                 pygame.display.update()
                 Reiniciar()
-    
-        
+
+        if puntos_p2 == puntos_p1:
+             
+             sd=pygame.image.load("finalfight.jpg")
+             sd=pygame.transform.scale(sd,(witdh,height))
+             display_surface.blit(sd,(0,0))
+             pygame.display.update()
+             pygame.time.delay(2000)
+
+             running2 = True
+
+             while running2:
+             
+                for i in elmo:
+                    fondo=pygame.image.load(i)
+                    fondo=pygame.transform.scale(fondo,(witdh,height))
+                    display_surface.blit(fondo,(0,0))
+                    display_surface.blit(player1,player1_rect)
+                    display_surface.blit(player2,player2_rect)
+                    display_surface.blit(ball_image,ball_rect)
+                    pygame.time.delay(20)
+                    pygame.display.update()
+
+                if running2 == True:
+                    
+
+                    ball_rect.x += dx * 40
+                    ball_rect.y += dy *40
+
+                    #Rebote
+
+                    if ball_rect.left<=0 or ball_rect.right>= witdh:
+                        dx = -1 * dx
+
+                        if ball_rect.left<=0:
+                            puntos_p2 +=1
+                            puntos2_text=fuente.render("Puntos P2:"+str(puntos_p2),True,(255,255,255),(0,0,0))
+                            ball_rect.center =(witdh/2,height/2)
+                            ball_rect.x += dx * ball_velocity
+                            dy=random.choice(aleatorio)
+                            ball_rect.y += dy * ball_velocity
+                            
+
+                            
+                        if ball_rect.right>= witdh:
+                            puntos_p1 +=1
+                            puntos1_text=fuente.render("Puntos P1:"+str(puntos_p1),True,(0,0,0),(255,255,255))
+                            ball_rect.center =(witdh/2,height/2)
+                            ball_rect.x += dx * ball_velocity
+                            dy=random.choice(aleatorio)
+                            ball_rect.y += dy * ball_velocity
+                            
+
+                        if puntos_p1 > puntos_p2:
+                 
+                            win1= pygame.image.load("win1.jpg")
+                            win1=pygame.transform.scale(win1,(witdh,height))
+                            display_surface.blit(win1,(0,0))
+                            pygame.display.update()
+                            Reiniciar()
+
+                
+                        if puntos_p2 > puntos_p1:
+                                
+                                win2= pygame.image.load("win2.jpg")
+                                win2=pygame.transform.scale(win2,(witdh,height))
+                                display_surface.blit(win2,(0,0))
+                                pygame.display.update()
+                                Reiniciar()
+
+
+                    if ball_rect.top<=64 or ball_rect.bottom>=height:
+                        dy = -1 * dy
+                    
+                    if player2_rect.colliderect(ball_rect):
+                        dx= -1 *dx
+                        dy=random.choice(aleatorio)
+
+                    if player1_rect.colliderect(ball_rect):
+                        dx= -1 * dx
+                        dy=random.choice(aleatorio)
+                        
+                    
+
+                    keys=pygame.key.get_pressed()
+
+                    #Mover la gallina
+
+                    if keys[pygame.K_UP] and player2_rect.top>64: 
+                            player2_rect.y-=100
+
+                    if keys[pygame.K_DOWN] and player2_rect.bottom<height:
+                            player2_rect.y+=100
+                    
+                    #Mover el pelicano
+
+                    if keys[pygame.K_w] and player1_rect.top>64: 
+                            player1_rect.y-=100
+
+                    if keys[pygame.K_s] and player1_rect.bottom<height:
+                            player1_rect.y+=100
+
+
+                    for event in pygame.event.get():
+                        #Cerrar juego
+                        if event.type == pygame.QUIT:
+                            running2 = False
+
+                    pygame.display.update()
+
+
+             
+                        
 
          
     print(f" La velocidad es:{ball_velocity}")
